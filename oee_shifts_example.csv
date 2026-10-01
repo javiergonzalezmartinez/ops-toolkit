@@ -1,1 +1,4 @@
-
+date,line,stop_reason,shift_min,planned_stop_min,unplanned_stop_min,ideal_rate_per_min,total_pieces,defective_pieces
+2026-01-01,Example line,Changeover,480,30,45,8,3000,60
+2026-01-02,Example line,Mechanical breakdown,480,30,60,8,2800,70
+2026-01-03,Example line,Changeover,480,30,25,8,3200,40
