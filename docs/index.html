@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hourly cost and OEE calculators</title>
+<style>
+  body{font-family:system-ui,sans-serif;max-width:46rem;margin:2rem auto;padding:0 1rem;line-height:1.5;color:#1a1a1a}
+  h1{font-size:1.5rem} h2{font-size:1.15rem;margin-top:2rem}
+  label{display:block;margin:.5rem 0 .1rem;font-size:.9rem}
+  input{padding:.35rem;width:10rem}
+  .out{margin-top:.75rem;padding:.75rem;background:#f4f6f8;border-radius:6px}
+  .note{font-size:.85rem;color:#555}
+  button{padding:.3rem .7rem}
+</style>
+</head>
+<body>
+<p><button id="lang">ES / EN</button></p>
+<h1 data-en="Hourly cost and OEE" data-es="Coste hora y OEE"></h1>
+<p class="note" data-en="Default values are illustrative examples, not real data. Results depend on the numbers you enter." data-es="Los valores por defecto son ejemplos, no datos reales. El resultado depende de los números que introduzcas."></p>
+
+<h2 data-en="Company hourly cost" data-es="Coste hora de la empresa"></h2>
+<label data-en="Monthly costs" data-es="Costes al mes"></label><input id="c_cost" type="number" value="14000">
+<label data-en="Hours per person per week" data-es="Horas por persona a la semana"></label><input id="c_hw" type="number" value="40">
+<label data-en="Productive share (0-1)" data-es="Parte productiva (0-1)"></label><input id="c_ps" type="number" step="0.01" value="0.65">
+<label data-en="People" data-es="Personas"></label><input id="c_pp" type="number" value="1">
+<label data-en="Margin (0-1)" data-es="Margen (0-1)"></label><input id="c_m" type="number" step="0.01" value="0.15">
+<label data-en="Your current rate (optional)" data-es="Tu tarifa actual (opcional)"></label><input id="c_r" type="number" value="110">
+<div class="out" id="c_out"></div>
+
+<h2>OEE</h2>
+<label data-en="Shift time (min)" data-es="Tiempo de turno (min)"></label><input id="o_s" type="number" value="480">
+<label data-en="Planned stops (min)" data-es="Paradas planificadas (min)"></label><input id="o_p" type="number" value="30">
+<label data-en="Unplanned stops (min)" data-es="Paradas no planificadas (min)"></label><input id="o_u" type="number" value="45">
+<label data-en="Ideal rate (pieces/min)" data-es="Velocidad ideal (piezas/min)"></label><input id="o_r" type="number" value="8">
+<label data-en="Total pieces" data-es="Piezas totales"></label><input id="o_t" type="number" value="3000">
+<label data-en="Defective pieces" data-es="Piezas defectuosas"></label><input id="o_d" type="number" value="60">
+<div class="out" id="o_out"></div>
+
+<p class="note">Formulas: <a href="formulas.md">formulas.md</a></p>
+
+<script>
+let lang = (navigator.language || "en").startsWith("es") ? "es" : "en";
+const $ = id => document.getElementById(id);
+const n = id => parseFloat($(id).value);
+const pct = x => (x * 100).toFixed(1) + "%";
+const T = {
+  en: {hours:"Productive hours/month", cost:"Hourly cost (break-even)", min:"Minimum rate with margin", below:"Your rate is below cost", edge:"Your rate covers cost but not the margin", ok:"Your rate covers cost and margin", bad:"Check the inputs", av:"Availability", pe:"Performance", qu:"Quality", oee:"OEE", warn:"Performance above 100%: check the ideal rate and the counts"},
+  es: {hours:"Horas productivas/mes", cost:"Coste hora (punto de equilibrio)", min:"Tarifa mínima con margen", below:"Tu tarifa está por debajo del coste", edge:"Tu tarifa cubre el coste pero no el margen", ok:"Tu tarifa cubre coste y margen", bad:"Revisa los datos", av:"Disponibilidad", pe:"Rendimiento", qu:"Calidad", oee:"OEE", warn:"Rendimiento superior al 100%: revisa la velocidad ideal y los recuentos"}
+};
+function calc(){
+  const t = T[lang];
+  const h = n("c_hw")*52/12*n("c_ps")*n("c_pp");
+  const c = n("c_cost")/h, m = c*(1+n("c_m"));
+  if (!isFinite(c) || h <= 0) { $("c_out").textContent = t.bad; }
+  else {
+    let v = "";
+    const r = n("c_r");
+    if (isFinite(r)) v = "<br>" + (r < c ? t.below : r < m ? t.edge : t.ok);
+    $("c_out").innerHTML = `${t.hours}: ${h.toFixed(2)}<br>${t.cost}: ${c.toFixed(2)}<br>${t.min}: ${m.toFixed(2)}${v}`;
+  }
+  const pp = n("o_s")-n("o_p"), run = pp-n("o_u");
+  const av = run/pp, pe = n("o_t")/(run*n("o_r")), qu = (n("o_t")-n("o_d"))/n("o_t");
+  if (![av,pe,qu].every(isFinite) || pp <= 0 || run <= 0) { $("o_out").textContent = t.bad; }
+  else $("o_out").innerHTML = `${t.av}: ${pct(av)}<br>${t.pe}: ${pct(pe)}<br>${t.qu}: ${pct(qu)}<br><strong>${t.oee}: ${pct(av*pe*qu)}</strong>` + (pe > 1 ? `<br>${t.warn}` : "");
+}
+function render(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll("[data-en]").forEach(e => e.textContent = e.dataset[lang]);
+  calc();
+}
+document.querySelectorAll("input").forEach(i => i.addEventListener("input", calc));
+$("lang").addEventListener("click", () => { lang = lang === "en" ? "es" : "en"; render(); });
+render();
+</script>
+</body>
+</html>
