@@ -15,6 +15,9 @@ Pequeñas fórmulas legibles para números de planta: **coste hora** y **OEE**. 
 | `ops_toolkit.py` | Formulas + a small command line |
 | `test_ops_toolkit.py` | Tests that check the formulas against hand calculations |
 | `oee_shifts_example.csv` | Example shift log (3 made-up shifts) |
+| `docs/formulas.md` | Every formula with a worked example you can check by hand |
+| `docs/index.html` | Static bilingual (EN/ES) calculator page using the same formulas |
+| `.github/workflows/ci.yml` | Tests on Python 3.9 and 3.12, plus a CLI smoke test |
 
 ## Hourly cost / Coste hora
 
@@ -53,13 +56,17 @@ It prints each shift and the unplanned minutes lost by reason, largest first.
 
 Use a measured ideal rate (time a good cycle with a stopwatch), not the catalogue figure. OEE measures the process, not the operator.
 
+## Calculator page
+
+`docs/index.html` is a single static file with no dependencies. Open it in a browser, or serve the `docs/` folder with GitHub Pages.
+
 ## Run the tests
 
 ```
 python3 -c "import test_ops_toolkit as t; [getattr(t, n)() for n in dir(t) if n.startswith('test_')]"
 ```
 
-(or `pytest` if you have it).
+(or `pytest` if you have it). See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request.
 
 ## Excel versions
 
