@@ -1,0 +1,16 @@
+[project]
+name = "ops-toolkit"
+version = "0.1.0"
+description = "Small, readable formulas for shop-floor numbers: hourly cost and OEE."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+ops-toolkit = "ops_toolkit:main"
+
+[tool.setuptools]
+py-modules = ["ops_toolkit"]
